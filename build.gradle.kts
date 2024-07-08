@@ -32,6 +32,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa") // Use JPA for data access if needed
 	implementation("org.postgresql:postgresql") // Example database driver
 	implementation("org.jetbrains.kotlin:kotlin-stdlib")
+	implementation("org.flywaydb:flyway-core")
+	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin") // JSON serialization/deserialization
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test")

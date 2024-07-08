@@ -41,3 +41,5 @@ out/
 
 ### Cockroach ###
 /cockroach-data/
+/postgres-data
+/cockroach
