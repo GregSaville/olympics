@@ -9,3 +9,4 @@ class OlympicsApplication
 fun main(args: Array<String>) {
 	runApplication<OlympicsApplication>(*args)
 }
+

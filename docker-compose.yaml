@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  olympics:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: org.savvy.olympics:0.0.0
+    ports:
+      - "8080:8080"
+    networks:
+      - olympics-network
+    depends_on:
+      - cockroachdb
+
+  cockroachdb:
+    image: cockroachdb/cockroach:v21.2.6
+    command: start-single-node --insecure
+    ports:
+      - "26257:26257"
+      - "8081:8080"
+    networks:
+      - olympics-network
+    volumes:
+      - cockroach-data:/cockroach/cockroach-data
+
+networks:
+  olympics-network:
+
+volumes:
+  cockroach-data:
+
