@@ -28,16 +28,18 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-web") // Use Web starter for REST APIs
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa") // Use JPA for data access if needed
-	implementation("org.postgresql:postgresql") // Example database driver
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("com.h2database:h2:2.1.214")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib")
-	implementation("org.flywaydb:flyway-core")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
-	implementation("com.fasterxml.jackson.module:jackson-module-kotlin") // JSON serialization/deserialization
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+	implementation("org.slf4j:slf4j-api:2.0.9")
+	implementation("ch.qos.logback:logback-classic:1.4.11")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
+
 
 tasks.test {
 	useJUnitPlatform()

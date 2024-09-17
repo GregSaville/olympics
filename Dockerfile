@@ -1,22 +1,14 @@
-# Stage 1: Build stage
-FROM gradle:7.6-jdk8 AS build
+# Use an official OpenJDK runtime as a parent image
+FROM eclipse-temurin:22-jdk
 
-# Set the working directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy the project files to the container
-COPY . .
+# Copy the build files from the host machine to the container
+COPY build/libs/olympics-0.0.1-SNAPSHOT.jar olympics.jar
 
-# Build the application (adjust for your specific build tool, here using Gradle)
-RUN gradle build --no-daemon
+# Expose the port the application will run on
+EXPOSE 8080
 
-# Stage 2: Runtime stage
-FROM openjdk:22-jdk-slim
-
-# Create a non-root user to run the application
-RUN useradd -m -s /bin/bash appuser
-
-# Set the working directory
-WORKDIR /app
-
-# Copy the built jar file
+# Define the command to run the application
+CMD ["java", "-jar", "olympics.jar"]

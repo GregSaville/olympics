@@ -1,31 +1,9 @@
 version: '3.8'
 
 services:
-  olympics:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: org.savvy.olympics:0.0.0
+  olympics-app:
+    build: .
     ports:
-      - "7676:7676"
-    networks:
-      - olympics-network
-    depends_on:
-      - postgres
-
-  postgres:
-    image: postgres:latest
-    environment:
-      POSTGRES_DB: olympicsdb
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
-    networks:
-      - olympics-network
+      - "8080:8080"
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
-
-networks:
-  olympics-network:
-    driver: bridge
+      - ./olympics.db:/app/olympics.db
