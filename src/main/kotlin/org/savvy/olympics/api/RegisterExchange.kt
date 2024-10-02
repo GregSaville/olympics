@@ -1,40 +1,45 @@
 package org.savvy.olympics.api
 
+import org.savvy.olympics.api.exceptions.NotFound
 import org.savvy.olympics.domains.services.UserService
 import org.savvy.olympics.domains.logging.Log
 import org.savvy.olympics.domains.logging.OlympicsLogger
 import org.savvy.olympics.domains.logging.enter
-import org.savvy.olympics.repos.entities.User
+import org.savvy.olympics.domains.services.TeamService
+import org.savvy.olympics.domains.twillio.TwilioService
+import org.savvy.olympics.repos.entities.Olympian
+import org.savvy.olympics.repos.entities.Team
+import org.savvy.olympics.repos.entities.toUserDtos
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.service.annotation.HttpExchange
+import java.util.*
 
-@HttpExchange("/register", accept = [MediaType.APPLICATION_JSON_VALUE])
+@HttpExchange(accept = [MediaType.APPLICATION_JSON_VALUE])
 interface RegisterExchange {
 
-    @GetMapping("/all")
+    @GetMapping("/register/all")
     fun getAllUsers():ResponseEntity<List<UserDto>>
 
-    @GetMapping
+    @GetMapping("/register")
     fun getRegistrationDetails(
         @RequestBody request: GetRegistrationRequest?
     ) : ResponseEntity<UserDto>
 
-    @PostMapping
+    @PostMapping("/register")
     fun submitRegistration(
         @RequestBody request: SubmitRegistrationRequest
-    ): ResponseEntity<List<UserDto>>
+    ): ResponseEntity<TeamDto>
 
-    @PutMapping
-    fun updateRegistration(
-        @RequestBody request: UpdateRegistrationRequest
-    ): ResponseEntity<List<UserDto>>
+    @PostMapping("/sign-in")
+    fun signIn(
+        @RequestBody request: SignInRequest
+    ): ResponseEntity<UserDto>
 }
 
 @RestController
@@ -46,114 +51,98 @@ class RegisterController : RegisterExchange {
 
     @Autowired
     lateinit var userService: UserService
+
+    @Autowired
+    lateinit var teamService: TeamService
+
+    @Autowired
+    lateinit var twilioService: TwilioService
+
     override fun getAllUsers(): ResponseEntity<List<UserDto>> {
         return ResponseEntity.ok(userService.findAllUsers().toDtos())
     }
 
     override fun getRegistrationDetails(request: GetRegistrationRequest?): ResponseEntity<UserDto> {
         val phoneNumber = request?.phoneNumber
-        when (val user = userService.findUser(phoneNumber)) {
-            null -> {
-                return if(phoneNumber == null) {
-                    ResponseEntity.notFound().build()
-                } else {
-                    ResponseEntity.ok(
-                        userService.createUser(
-                            User(
-                                phoneNumber = phoneNumber
-                            )
-                        ).toDto()
-                    )
-                }
-            }
-            else -> return ResponseEntity.ok(user.toDto())
+        return when (val user = userService.findUser(phoneNumber)) {
+            null -> ResponseEntity.notFound().build()
+            else -> ResponseEntity.ok(user.toDto())
         }
     }
 
-    override fun submitRegistration(request: SubmitRegistrationRequest): ResponseEntity<List<UserDto>> {
+    override fun submitRegistration(request: SubmitRegistrationRequest): ResponseEntity<TeamDto> {
         if (request.username.isBlank()) return ResponseEntity.badRequest().build()
-        when (val user = userService.findUser(request.phoneNumber)) {
-            null -> {
-                // Create the main user
-                val createdUser = userService.createUser(
-                    User(
-                        userName = request.username,
-                        phoneNumber = request.phoneNumber
-                    )
-                )
-                request.plusOne?.let { plusOneRequest ->
-                    val guest = userService.findUser(plusOneRequest.plusOnesNumber)
-                    if (guest == null) {
-                        val plusOne = userService.createUser(
-                            User(
-                                phoneNumber = plusOneRequest.plusOnesNumber
-                            )
-                        )
 
-                        createdUser.assignPlusOne(plusOne)
-                        return ResponseEntity.ok(listOf(createdUser, plusOne).toDtos())
-                    } else {
-                        return ResponseEntity.ok(listOf(createdUser, guest).toDtos())
-                    }
-                }
+        // Find or create the main user (Olympian)
+        val user = userService.findUser(request.phoneNumber) ?: userService.createUser(
+            Olympian(
+                userName = request.username,
+                phoneNumber = request.phoneNumber,
+                participating = request.participating
+            )
+        )
 
-                return ResponseEntity.ok(listOf(createdUser).toDtos())
-            }
-            else -> {
-                OlympicsLogger.log.enter(log = Log(location = location, message = "User Found ${user.userName} Updating their name to ${request.username}"))
-                user.userName = request.username
-                request.plusOne?.let { plusOneRequest ->
-                    val guest = userService.findUser(plusOneRequest.plusOnesNumber)
+        val userTeam = teamService.findByNumber(user.phoneNumber)
 
-                    if (guest == null) {
-                        val plusOne = userService.createUser(
-                            User(
-                                phoneNumber = plusOneRequest.plusOnesNumber
-                            )
-                        )
-
-                        createdUser.assignPlusOne(plusOne)
-                        return ResponseEntity.ok(listOf(createdUser, plusOne).toDtos())
-                    }
-
-                    user.assignPlusOne(guestUser)
-                    userService.updateUser(user)
-                    userService.updateUser(guestUser)
-
-                    return ResponseEntity.ok(listOf(user, guestUser).toDtos())
-                }
-
-                return ResponseEntity.ok(listOf(user).toDtos())
-            }
+        if(userTeam != null) {
+            return ResponseEntity.ok(userTeam.toDto())
         }
+
+        // If a plus one is provided, find or create the second Olympian (plus one)
+        val team = request.plusOne?.let { plusOneRequest ->
+            val plusOne = userService.findUser(plusOneRequest.phoneNumber) ?: userService.createUser(
+                Olympian(
+                    phoneNumber = plusOneRequest.phoneNumber,
+                    userName = plusOneRequest.username,
+                    participating = plusOneRequest.participating
+                )
+            )
+
+            // Create a new team with the two Olympians
+            teamService.create(
+                Team(
+                    playerOne = user,
+                    playerTwo = plusOne
+                )
+            )
+        } ?: run {
+            // If no plus one is provided, create a single-player team
+            teamService.create(
+                Team(
+                    playerOne = user,
+                    playerTwo = null // No plus one
+                )
+            )
+        }
+
+        return ResponseEntity.ok(team.toDto())
     }
 
-    override fun updateRegistration(request: UpdateRegistrationRequest): ResponseEntity<List<UserDto>> {
-        when (val user = userService.findUser(request.phoneNumber)) {
-            null -> {
-                return ResponseEntity.notFound().build()
-            }
-            else -> {
-                user.userName = request.username
-                userService.updateUser(user)
-                request.plusOne?.let { plusOneRequest ->
-                    val guest = userService.findUser(plusOneRequest.plusOnesNumber)
-                    if (guest == null) {
-                        userService.createUser(
-                            User(
-                                phoneNumber = plusOneRequest.plusOnesNumber
-                            )
-                        )
-                    }
-                    val guestUser = userService.findUser(plusOneRequest.plusOnesNumber)
-                        ?: userService.createUser(User(phoneNumber = plusOneRequest.plusOnesNumber))
-                    user.assignPlusOne(guestUser)
-                    userService.updateUser(user)
-                    userService.updateUser(guestUser)
+    override fun signIn(request: SignInRequest): ResponseEntity<UserDto> {
 
-                    return ResponseEntity.ok(listOf(user, guestUser).toDtos())
+        val userAttempting = userService.findUser(request.phoneNumber) ?: throw NotFound("user for number ${request.phoneNumber}")
+
+        userAttempting.verifiedOtp?.let {
+            if(it == request.otp)  {
+                return ResponseEntity.ok(userAttempting.toDto())
+            } else {
+                return ResponseEntity.badRequest().build()
+            }
+        } ?: run {
+            request.otp?.let {
+                try {
+                    val check = twilioService.checkVerification(userAttempting.phoneNumber, request.otp)
+                    if (check) {
+                        return ResponseEntity.ok(userAttempting.toDto())
+                    } else {
+                        return ResponseEntity.badRequest().build()
+                    }
+                } catch (e: Exception) {
+                    twilioService.sendVerification(userAttempting.phoneNumber)
+                    return ResponseEntity.accepted().build()
                 }
-                return ResponseEntity.ok(listOf(user).toDtos())
+            } ?: run {
+                return ResponseEntity.badRequest().build()
             }
         }
     }
@@ -168,47 +157,44 @@ data class GetRegistrationRequest(
 data class SubmitRegistrationRequest(
     val username: String,
     val phoneNumber: String,
+    val participating: Boolean,
     val plusOne: CreatePlusOneRequest?
 )
 
 data class CreatePlusOneRequest(
-    val plusOnesNumber: String,
-    val username: String?
-)
-
-data class UpdatePlusOneRequest(
-    val plusOnesNumber: String,
-    val username: String,
-    val participating: Boolean,
-)
-
-data class UpdateRegistrationRequest(
     val phoneNumber: String,
-    val username: String,
-    val participating: Boolean,
-    val plusOne: UpdatePlusOneRequest?
+    val username: String?,
+    val participating: Boolean
 )
-
 data class UserDto(
     val phoneNumber: String,
     val username: String?,
-    val partner: PartnerDto? = null
+    val participating: Boolean,
+    val team: UUID? = null
 )
 
 data class PartnerDto(
     val username: String?,
-    val phoneNumber: String
+    val phoneNumber: String,
+    val participating: Boolean,
 )
 
-fun List<User>.toDtos(): List<UserDto> = map { it.toDto() }
+data class SignInRequest(
+    val phoneNumber: String,
+    val otp: String?,
+)
 
-fun User.toDto() = UserDto(
+fun List<Olympian>.toDtos(): List<UserDto> = map { it.toDto() }
+
+fun Olympian.toDto() = UserDto(
     username = userName,
     phoneNumber = phoneNumber,
-    partner = plusOne?.toPartnerDto()
+    participating = participating,
+    team = team?.id
 )
 
-fun User.toPartnerDto() = PartnerDto(
+fun Olympian.toPartnerDto() = PartnerDto(
     username = userName,
-    phoneNumber = phoneNumber
+    phoneNumber = phoneNumber,
+    participating = participating
 )

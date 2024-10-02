@@ -5,5 +5,18 @@ services:
     build: .
     ports:
       - "8080:8080"
+
+  postgres:
+    image: postgres:17
+    container_name: olympics_postgres
+    environment:
+      POSTGRES_USER: olympics_admin
+      POSTGRES_PASSWORD: olympics_password
+      POSTGRES_DB: olympics_db
+    ports:
+      - "5432:5432"
     volumes:
-      - ./olympics.db:/app/olympics.db
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

@@ -13,8 +13,8 @@ data class Tournament(
     var name: String? = null,
 
     @OneToMany
-    var participants: List<User> = mutableListOf(),
+    var participants: List<Olympian> = mutableListOf(),
 
     @OneToMany
-    var events: List<Event> = mutableListOf()
+    var olympicEvents: List<OlympicEvent> = mutableListOf()
 )

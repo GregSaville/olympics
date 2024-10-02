@@ -5,21 +5,15 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Entity
-@Table(name = "users")
-data class User(
+data class Olympian(
     @Id @GeneratedValue
     val id: UUID = UUID.randomUUID(),
     val phoneNumber: String,
+    var verifiedOtp: String? = null,
     var userName :String? = null,
     @OneToOne
-    var plusOne: User? = null,
-    @OneToOne
+    @JoinColumn(name = "team_id")
     var team: Team? = null,
     val participating: Boolean = false,
     val registrationDate: LocalDateTime = LocalDateTime.now()
-) {
-    fun assignPlusOne(plusOne: User) {
-        this.plusOne = plusOne
-        plusOne.plusOne = this
-    }
-}
+)

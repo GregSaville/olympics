@@ -3,14 +3,11 @@ package org.savvy.olympics.domains.services
 import org.savvy.olympics.domains.logging.Log
 import org.savvy.olympics.domains.logging.OlympicsLogger
 import org.savvy.olympics.domains.logging.enter
-import org.savvy.olympics.repos.entities.Event
 import org.savvy.olympics.repos.entities.Tournament
-import org.savvy.olympics.repos.entities.User
 import org.savvy.olympics.repos.repositories.TournamentRepo
 import org.springframework.stereotype.Service
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
-import kotlin.math.log
 
 @Service
 class TournamentService(
@@ -33,7 +30,7 @@ class TournamentService(
         val participants = userService.findAllParticipants()
 
         newTournament.participants = participants
-        newTournament.events = emptyList()
+        newTournament.olympicEvents = emptyList()
 
         g.log.enter(log = Log(
             message = "!!!!!!!++++++++++++===Tournament ${newTournament.name ?: tournamentId} has Begun!===++++++++++++!!!!!!!",

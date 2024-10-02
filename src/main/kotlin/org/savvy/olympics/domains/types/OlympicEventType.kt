@@ -1,6 +1,6 @@
 package org.savvy.olympics.domains.types
 
-enum class EventType {
+enum class OlympicEventType {
     PONG,
     BAGS
 

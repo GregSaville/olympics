@@ -28,10 +28,11 @@ repositories {
 }
 
 dependencies {
+	implementation("com.twilio.sdk:twilio:8.31.1")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("com.h2database:h2:2.1.214")
-	implementation("org.jetbrains.kotlin:kotlin-stdlib")
+	implementation("org.postgresql:postgresql:42.6.0")
+	implementation("org.liquibase:liquibase-core")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.slf4j:slf4j-api:2.0.9")

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+<!--   <include file="db/changelog/migration/00_create_user_table.xml"/>-->
+<!--   <include file="db/changelog/migration/01_create_event_table.xml"/>-->
+<!--   <include file="db/changelog/migration/02_create_outcome_table.xml"/>-->
+<!--   <include file="db/changelog/migration/03_create_tournament_table.xml"/>-->
+<!--   <include file="db/changelog/migration/04_create_team_table.xml"/>xml-->
+</databaseChangeLog>
