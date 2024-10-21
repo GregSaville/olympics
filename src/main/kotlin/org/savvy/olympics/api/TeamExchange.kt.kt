@@ -23,7 +23,7 @@ interface TeamExchange {
 
     @GetMapping
     fun getTeam(
-        @Param(value = "teamId") teamId: UUID?,
+        @Param(value = "teamId") teamId: String?,
         @Param(value = "phoneNumber") phoneNumber: String?
     ): ResponseEntity<TeamDto?>
 
@@ -57,15 +57,17 @@ class TeamController(
         return ResponseEntity.ok(teamService.getAll().toDtos())
     }
 
-    override fun getTeam(teamId: UUID?, phoneNumber: String?): ResponseEntity<TeamDto?> {
-        OlympicsLogger.log.enter(log = Log(location = TeamExchange::class.java.name, message = "Looking for team with id $teamId"))
-        if (teamId != null) {
-            val result = teamService.findById(teamId) ?: throw NotFound("no team for id $teamId")
+    override fun getTeam(id: String?, phoneNumber: String?): ResponseEntity<TeamDto?> {
+        if (id != null) {
+            val typedId = UUID.fromString(id)
+            OlympicsLogger.log.enter(log = Log(location = TeamExchange::class.java.name, message = "Looking for team with id $id"))
+            val result = teamService.findById(typedId) ?: throw NotFound("no team for id $id")
 
             return ResponseEntity.ok(result.toDto())
         }
 
         return if (phoneNumber != null) {
+            OlympicsLogger.log.enter(log = Log(location = TeamExchange::class.java.name, message = "Looking for team with number $phoneNumber"))
             val result = teamService.findByNumber(phoneNumber) ?: throw NotFound("no team for number $phoneNumber")
 
             ResponseEntity.ok(result.toDto())
