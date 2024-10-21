@@ -8,6 +8,8 @@ import java.util.UUID
 interface TeamRepo {
     fun createTeam(team: Team): Team
 
+    fun update(team: Team): Team
+
     fun findTeamByPhone(phoneNumber: String): Team?
 
     fun findAll(): List<Team>

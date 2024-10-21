@@ -10,6 +10,12 @@
             <column name="id" type="UUID">
                 <constraints primaryKey="true"/>
             </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="color" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
             <column name="player_one_id" type="UUID">
                 <constraints nullable="false"/>
             </column>

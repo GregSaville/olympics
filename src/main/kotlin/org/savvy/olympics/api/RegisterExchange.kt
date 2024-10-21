@@ -2,14 +2,10 @@ package org.savvy.olympics.api
 
 import org.savvy.olympics.api.exceptions.NotFound
 import org.savvy.olympics.domains.services.UserService
-import org.savvy.olympics.domains.logging.Log
-import org.savvy.olympics.domains.logging.OlympicsLogger
-import org.savvy.olympics.domains.logging.enter
 import org.savvy.olympics.domains.services.TeamService
 import org.savvy.olympics.domains.twillio.TwilioService
 import org.savvy.olympics.repos.entities.Olympian
 import org.savvy.olympics.repos.entities.Team
-import org.savvy.olympics.repos.entities.toUserDtos
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -72,7 +68,6 @@ class RegisterController : RegisterExchange {
 
     override fun submitRegistration(request: SubmitRegistrationRequest): ResponseEntity<TeamDto> {
         if (request.username.isBlank()) return ResponseEntity.badRequest().build()
-
         // Find or create the main user (Olympian)
         val user = userService.findUser(request.phoneNumber) ?: userService.createUser(
             Olympian(
@@ -170,7 +165,6 @@ data class UserDto(
     val phoneNumber: String,
     val username: String?,
     val participating: Boolean,
-    val team: UUID? = null
 )
 
 data class PartnerDto(
@@ -190,7 +184,6 @@ fun Olympian.toDto() = UserDto(
     username = userName,
     phoneNumber = phoneNumber,
     participating = participating,
-    team = team?.id
 )
 
 fun Olympian.toPartnerDto() = PartnerDto(

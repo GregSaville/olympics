@@ -17,4 +17,10 @@ data class Tournament(
 
     @OneToMany
     var olympicEvents: List<OlympicEvent> = mutableListOf()
-)
+) {
+
+    fun addEvents(addedOlympicEvents: List<OlympicEvent>): List<OlympicEvent> {
+        return olympicEvents.toMutableList().plus(addedOlympicEvents).toList()
+    }
+
+}

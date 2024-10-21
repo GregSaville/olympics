@@ -56,7 +56,7 @@ class UserRepoImpl(val entityManager: EntityManager) : UserRepo {
         LOG.debug("Finding Participants!")
 
         val queryStr = """
-            SELECT o FROM ${Tables.USER} o where participating = true
+            SELECT o FROM Olympian o where participating = true
         """.trimIndent()
 
         val query = entityManager.createQuery(queryStr, Olympian::class.java)

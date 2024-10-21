@@ -32,6 +32,11 @@ interface TeamExchange {
         @RequestBody requestBody: CreateTeamRequest
     ): ResponseEntity<TeamDto?>
 
+    @PostMapping("/update")
+    fun updateTeam(
+        @RequestBody request: UpdateTeamRequest
+    ): ResponseEntity<TeamDto?>
+
     @DeleteMapping
     fun leaveTeam(
         @RequestBody request: LeaveTeamRequest
@@ -92,9 +97,27 @@ class TeamController(
         }
     }
 
+    override fun updateTeam(request: UpdateTeamRequest): ResponseEntity<TeamDto?> {
+        return with(request) {
+            val team = teamService.findById(teamId) ?: throw NotFound("Team for id $teamId")
+
+            if (!newTeamName.isNullOrBlank()) {
+                team.name = newTeamName
+            }
+            if (!teamColor.isNullOrBlank()) {
+                team.color = teamColor
+            }
+
+            val updatedTeam = teamService.update(team) ?: throw NotFound("Team for id $teamId")
+
+            ResponseEntity.ok(updatedTeam.toDto())
+        }
+    }
+
+
     override fun leaveTeam(request: LeaveTeamRequest): ResponseEntity<Void> {
 
-        val result = teamService.leaveTeam(request.phoneNumber)
+        teamService.leaveTeam(request.phoneNumber)
 
         return ResponseEntity.noContent().build()
     }
@@ -108,6 +131,8 @@ class TeamController(
 
 data class TeamDto(
     val id: UUID,
+    val name: String,
+    val color: String,
     val playerOne: UserDto,
     val playerTwo: UserDto?
 )
@@ -124,10 +149,25 @@ data class LeaveTeamRequest(
 data class CreateTeamRequest(
     val playerOneId: UUID,
     val playerTwoId: UUID?,
-//    val teamName: String,
-//    val teamColor: String,
+    val teamName: String? = null,
+    val teamColor: String? = null,
+)
+
+data class UpdateTeamRequest(
+    val teamId: UUID,
+    val newTeamName: String?,
+    val teamColor: String?
 )
 
 fun List<Team>.toDtos(): List<TeamDto> = this.map { it.toDto() }
 
-fun Team.toDto(): TeamDto = TeamDto(this.id, this.playerOne.toDto(), this.playerTwo?.toDto())
+fun Team.toDto(): TeamDto = TeamDto(
+    id = this.id,
+    name = this.name,
+    color = this.color,
+    playerOne = this.playerOne.toDto(),
+    playerTwo = run {
+        this.playerTwo?.let {
+            return@run it.toDto()
+        } ?: return@run null
+    })

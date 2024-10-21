@@ -3,8 +3,6 @@ package org.savvy.olympics.repos.entities
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
-import org.savvy.olympics.domains.types.OlympicEventType
 import java.util.UUID
 
 @Entity

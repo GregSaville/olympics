@@ -22,6 +22,17 @@ class TeamRepoImpl(
 
     override fun createTeam(team: Team): Team {
         LOG.debug("Saving Team ${team.id}")
+        val createdTeam = entityManager.merge(team)
+        createdTeam.playerOne.team = team
+        createdTeam.playerTwo?.let {
+            it.team = team
+            entityManager.merge(it)
+        }
+        entityManager.merge(team.playerOne)
+        return createdTeam
+    }
+
+    override fun update(team: Team): Team {
         return entityManager.merge(team)
     }
 
@@ -64,7 +75,7 @@ class TeamRepoImpl(
         val idParam = "idParam"
 
         val queryStr = """
-            SELECT t FROM Team t 
+            SELECT t FROM Team t
             WHERE t.id = :idParam
         """.trimIndent()
 

@@ -13,9 +13,6 @@
             <column name="user_name" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="team_id" type="UUID">
-                <constraints nullable="true"/>
-            </column>
             <column name="phone_number" type="VARCHAR(20)"/>
             <column name="verified_otp" type="VARCHAR(4)"/>
             <column name="registration_date" type="TIMESTAMP"/>

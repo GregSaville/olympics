@@ -19,27 +19,28 @@ class TournamentService(
         val g = OlympicsLogger
     }
 
-    private var tournamentId : UUID? = null
     fun getTournament(): Tournament? {
-        return tournamentId?.let { tournamentRepo.findById(it).getOrNull() }
+        return tournamentRepo.findAll().firstOrNull()
     }
 
     fun createTournament(tournamentName: String?): Tournament {
-        val newTournament = Tournament()
 
-        val participants = userService.findAllParticipants()
+       return getTournament() ?: run {
+            val newTournament = Tournament()
 
-        newTournament.participants = participants
-        newTournament.olympicEvents = emptyList()
+            val participants = userService.findAllParticipants()
 
-        g.log.enter(log = Log(
-            message = "!!!!!!!++++++++++++===Tournament ${newTournament.name ?: tournamentId} has Begun!===++++++++++++!!!!!!!",
-            location = TournamentService::class.java.name
-        )
-        )
+            newTournament.participants = participants
+            newTournament.olympicEvents = emptyList()
 
-        tournamentRepo.save(newTournament)
-        tournamentId = newTournament.id
-        return newTournament
+            g.log.enter(
+                log = Log(
+                    message = "!!!!!!!++++++++++++===Tournament ${newTournament.name ?: newTournament.id} has Begun!===++++++++++++!!!!!!!",
+                    location = TournamentService::class.java.name
+                )
+            )
+            tournamentRepo.save(newTournament)
+            return newTournament
+        }
     }
 }

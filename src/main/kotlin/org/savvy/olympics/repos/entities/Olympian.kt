@@ -11,9 +11,8 @@ data class Olympian(
     val phoneNumber: String,
     var verifiedOtp: String? = null,
     var userName :String? = null,
-    @OneToOne
-    @JoinColumn(name = "team_id")
-    var team: Team? = null,
     val participating: Boolean = false,
-    val registrationDate: LocalDateTime = LocalDateTime.now()
+    val registrationDate: LocalDateTime = LocalDateTime.now(),
+    @ManyToOne
+    var team: Team? = null,
 )

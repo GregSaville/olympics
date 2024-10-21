@@ -1,32 +1,33 @@
 package org.savvy.olympics.repos.entities
 
 import jakarta.persistence.*
-import org.savvy.olympics.domains.types.OlympicEventType
+import org.savvy.olympics.domains.types.OlympicEvent
 import java.util.UUID
+import kotlin.jvm.Transient
 
 @Entity
 data class OlympicEvent(
     @Id
-    val id: UUID,
+    val id: UUID = UUID.randomUUID(),
 
     val name: String,
 
-    val type: OlympicEventType,
+    @Transient
+    val type: OlympicEvent,
 
     val location: String,
 
     val tournamentId: UUID,
 
     @OneToMany
-    val lifeLongParticipants: List<Team>,
+    var lifeLongParticipants: List<Team>,
 
     @OneToMany
-    val outComes: List<EventOutcome>,
+    var outComes: List<EventOutcome>,
 
     @OneToOne
-    val activeTeamRed: Team?,
+    var activeTeamRed: Team?,
 
     @OneToOne
-    val activeTeamBlue: Team?,
+    var activeTeamBlue: Team?,
 )
-

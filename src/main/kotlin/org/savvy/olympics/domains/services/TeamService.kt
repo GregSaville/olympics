@@ -21,7 +21,9 @@ class TeamService(
 
     @Transactional
     fun getAll(): List<Team> {
-        return teamRepo.findAll()
+       val result = teamRepo.findAll()
+        println("all Teams Found $result")
+        return result
     }
 
     @Transactional
@@ -32,6 +34,11 @@ class TeamService(
     @Transactional
     fun findById(teamId: UUID): Team? {
         return teamRepo.findById(teamId)
+    }
+
+    @Transactional
+    fun update(team: Team): Team? {
+        return teamRepo.update(team)
     }
 
     @Transactional
