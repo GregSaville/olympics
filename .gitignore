@@ -43,3 +43,4 @@ out/
 /cockroach-data/
 /postgres-data
 /cockroach
+src/main/resources/application.properties
