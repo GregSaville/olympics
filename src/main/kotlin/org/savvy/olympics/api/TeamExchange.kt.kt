@@ -46,6 +46,11 @@ interface TeamExchange {
     fun mergeTeams(
         @RequestBody request: MergeTeamsRequest
     ): ResponseEntity<TeamDto>
+
+    @PostMapping("/join")
+    fun joinTeam(
+         @RequestBody request: JoinTeamRequest
+    ): ResponseEntity<TeamDto>
 }
 
 @RestController
@@ -129,6 +134,12 @@ class TeamController(
 
         return ResponseEntity.ok(result.toDto())
     }
+
+    override fun joinTeam(request: JoinTeamRequest): ResponseEntity<TeamDto> {
+        val result = teamService.joinTeam(request.teamId, request.userId)
+
+        return ResponseEntity.ok(result.toDto())
+    }
 }
 
 data class TeamDto(
@@ -137,6 +148,11 @@ data class TeamDto(
     val color: String,
     val playerOne: UserDto,
     val playerTwo: UserDto?
+)
+
+data class JoinTeamRequest(
+    val teamId: UUID,
+    val userId: UUID,
 )
 
 data class MergeTeamsRequest(

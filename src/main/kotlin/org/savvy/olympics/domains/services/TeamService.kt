@@ -32,6 +32,20 @@ class TeamService(
     }
 
     @Transactional
+    fun joinTeam(teamId: UUID, userId: UUID): Team {
+
+        val team = teamRepo.findById(teamId) ?: throw NotFound(teamId.toString())
+
+        val user = userService.findUsers(listOf(userId)).firstOrNull() ?: throw NotFound(userId.toString())
+
+        if (team.playerOne == user) throw BadRequest("Duplicate User")
+
+        if (team.playerTwo != null) throw BadRequest("Team Full")
+
+        return teamRepo.update(team.copy(playerTwo = user))
+    }
+
+    @Transactional
     fun findById(teamId: UUID): Team? {
         return teamRepo.findById(teamId)
     }
