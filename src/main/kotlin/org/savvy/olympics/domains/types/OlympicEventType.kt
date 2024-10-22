@@ -66,3 +66,19 @@ data object BeerPong : OlympicEvent {
             )
         )
 }
+
+data object Relay : OlympicEvent {
+    override val score: Score
+        get() = TODO("Not yet implemented")
+    override val rules: List<Rule>
+        get() = TODO("Not yet implemented")
+
+}
+
+data object Bags : OlympicEvent {
+    override val score: Score
+        get() = TODO("Not yet implemented")
+    override val rules: List<Rule>
+        get() = TODO("Not yet implemented")
+
+}

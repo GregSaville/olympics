@@ -36,6 +36,18 @@ class EventRepoImpl(
         return entityManager.merge(olympicEvent)
     }
 
+    override fun findAll(): List<OlympicEvent> {
+        LOG.debug("Finding Events")
+
+        val queryStr = """
+            SELECT oe FROM OlympicEvent oe
+        """.trimIndent()
+
+        val query = entityManager.createQuery(queryStr, OlympicEvent::class.java)
+
+        return events(query)
+    }
+
     private fun events(query: TypedQuery<OlympicEvent>) = try {
         query.resultList!!
     } catch (e: EmptyResultDataAccessException) {

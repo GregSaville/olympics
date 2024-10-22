@@ -21,6 +21,9 @@ interface TeamExchange {
     @GetMapping("/all")
     fun getAllTeams(): ResponseEntity<List<TeamDto>>
 
+    @GetMapping("/joinable")
+    fun getAllJoinableTeams(): ResponseEntity<List<TeamDto>>
+
     @GetMapping
     fun getTeam(
         @Param(value = "teamId") teamId: String?,
@@ -60,6 +63,10 @@ class TeamController(
 ): TeamExchange {
     override fun getAllTeams(): ResponseEntity<List<TeamDto>> {
         return ResponseEntity.ok(teamService.getAll().toDtos())
+    }
+
+    override fun getAllJoinableTeams(): ResponseEntity<List<TeamDto>> {
+        return ResponseEntity.ok(teamService.getJoinable().toDtos())
     }
 
     override fun getTeam(id: String?, phoneNumber: String?): ResponseEntity<TeamDto?> {
@@ -109,9 +116,11 @@ class TeamController(
             val team = teamService.findById(teamId) ?: throw NotFound("Team for id $teamId")
 
             if (!newTeamName.isNullOrBlank()) {
+                OlympicsLogger.log.enter(log = Log(location = TeamExchange::class.java.name, message = "Updating Team ${team.name} to $newTeamName"))
                 team.name = newTeamName
             }
             if (!teamColor.isNullOrBlank()) {
+                OlympicsLogger.log.enter(log = Log(location = TeamExchange::class.java.name, message = "Updating Team ${team.name}'s color to $teamColor"))
                 team.color = teamColor
             }
 
@@ -147,7 +156,8 @@ data class TeamDto(
     val name: String,
     val color: String,
     val playerOne: UserDto,
-    val playerTwo: UserDto?
+    val playerTwo: UserDto?,
+    val totalPoints: Int,
 )
 
 data class JoinTeamRequest(
@@ -188,4 +198,6 @@ fun Team.toDto(): TeamDto = TeamDto(
         this.playerTwo?.let {
             return@run it.toDto()
         } ?: return@run null
-    })
+    },
+    totalPoints = totalPoints.toInt()
+)

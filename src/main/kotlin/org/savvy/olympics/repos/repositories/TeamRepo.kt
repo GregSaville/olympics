@@ -14,6 +14,8 @@ interface TeamRepo {
 
     fun findAll(): List<Team>
 
+    fun findJoinable(): List<Team>
+
     fun findById(id: UUID): Team?
 
     fun delete(teamId: UUID)

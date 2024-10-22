@@ -8,4 +8,6 @@ interface EventRepo {
     fun findById(eventId: UUID): OlympicEvent?
 
     fun create(olympicEvent: OlympicEvent): OlympicEvent
+
+    fun findAll(): List<OlympicEvent>
 }

@@ -70,6 +70,19 @@ class TeamRepoImpl(
         return teams(query)
     }
 
+    override fun findJoinable(): List<Team> {
+        LOG.debug("Finding Joinable Teams!")
+
+        val queryStr = """
+            SELECT t FROM Team t
+            WHERE (t.playerOne IS NULL OR t.playerTwo IS NULL)
+        """.trimIndent()
+
+        val query = entityManager.createQuery(queryStr, Team::class.java)
+
+        return teams(query)
+    }
+
     override fun findById(id: UUID): Team? {
         LOG.debug("Searching For Team with id: $id")
         val idParam = "idParam"

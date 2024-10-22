@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.servlet.resource.NoResourceFoundException
 
 @ControllerAdvice
 class GlobalExceptionHandler {
@@ -19,6 +20,12 @@ class GlobalExceptionHandler {
     fun handleNoResultException(ex: NoResultException): ResponseEntity<String> {
         LOG.error("No result found: ${ex.message}", ex)
         return ResponseEntity("No result found", HttpStatus.NOT_FOUND)
+    }
+
+    @ExceptionHandler(NoResourceFoundException::class)
+    fun handleNoResourceException(ex: NoResourceFoundException): ResponseEntity<String> {
+        LOG.error("No result found: ${ex.message}", ex)
+        return ResponseEntity("No resource found", HttpStatus.NOT_FOUND)
     }
     @ExceptionHandler(Exception::class)
     fun handleGenericException(ex: Exception): ResponseEntity<String> {

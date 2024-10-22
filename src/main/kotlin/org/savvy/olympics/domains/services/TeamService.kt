@@ -22,8 +22,12 @@ class TeamService(
     @Transactional
     fun getAll(): List<Team> {
        val result = teamRepo.findAll()
-        println("all Teams Found $result")
         return result
+    }
+
+    @Transactional
+    fun getJoinable(): List<Team> {
+        return teamRepo.findJoinable()
     }
 
     @Transactional

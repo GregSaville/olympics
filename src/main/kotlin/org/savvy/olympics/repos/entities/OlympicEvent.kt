@@ -17,6 +17,8 @@ data class OlympicEvent(
 
     val location: String,
 
+//    var queue: List<Team>,
+
     val tournamentId: UUID,
 
     @OneToMany
