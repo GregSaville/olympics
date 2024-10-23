@@ -73,16 +73,16 @@ class TeamController(
         if (id != null) {
             val typedId = UUID.fromString(id)
             OlympicsLogger.log.enter(log = Log(location = TeamExchange::class.java.name, message = "Looking for team with id $id"))
-            val result = teamService.findById(typedId) ?: throw NotFound("no team for id $id")
+            val result = teamService.findById(typedId)
 
-            return ResponseEntity.ok(result.toDto())
+            return ResponseEntity.ok(result?.toDto())
         }
 
         return if (phoneNumber != null) {
             OlympicsLogger.log.enter(log = Log(location = TeamExchange::class.java.name, message = "Looking for team with number $phoneNumber"))
-            val result = teamService.findByNumber(phoneNumber) ?: throw NotFound("no team for number $phoneNumber")
+            val result = teamService.findByNumber(phoneNumber)
 
-            ResponseEntity.ok(result.toDto())
+            ResponseEntity.ok(result?.toDto())
         } else {
             ResponseEntity.notFound().build()
         }
@@ -102,11 +102,16 @@ class TeamController(
             val newTeam = Team(playerOne = users[0], playerTwo = users[1])
             return ResponseEntity.ok(teamService.create(newTeam).toDto())
         } ?: run {
+            OlympicsLogger.log.enter(log = Log(location = TeamExchange::class.java.name, message = "attempting to create a new team for user ${request.playerOneId}"))
+
             val user = userService.findUsers(listOf(request.playerOneId)).first()
 
             if (user.team != null) throw BadRequest("Already assigned to team, leave before creating a new team")
 
             val newTeam = Team(playerOne = user, playerTwo = null)
+
+            OlympicsLogger.log.enter(log = Log(location = TeamExchange::class.java.name, message = "Creating new team: ${newTeam.name}"))
+
             return ResponseEntity.ok(teamService.create(newTeam).toDto())
         }
     }
@@ -133,6 +138,7 @@ class TeamController(
 
     override fun leaveTeam(request: LeaveTeamRequest): ResponseEntity<Void> {
 
+        OlympicsLogger.log.enter(log = Log(location = TeamExchange::class.java.name, message = "User ${request.phoneNumber} Leaving Team"))
         teamService.leaveTeam(request.phoneNumber)
 
         return ResponseEntity.noContent().build()

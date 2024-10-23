@@ -61,17 +61,30 @@ class TeamService(
 
     @Transactional
     fun leaveTeam(phoneNumber: String) {
-        val teamToLeave = teamRepo.findTeamByPhone(phoneNumber) ?: throw NotFound("no team for phone number $phoneNumber")
+        val teamToLeave = teamRepo.findTeamByPhone(phoneNumber) ?: throw NotFound("No team for phone number $phoneNumber")
 
-        if (teamToLeave.playerTwo != null){
-            teamToLeave.playerOne = teamToLeave.playerTwo!!
-            teamToLeave.playerTwo = null
-            return
-        } else {
-            teamRepo.delete(teamToLeave.id)
-            return
+        when {
+            teamToLeave.playerOne.phoneNumber == phoneNumber -> {
+                if (teamToLeave.playerTwo != null) {
+                    // If playerTwo exists, promote them to playerOne
+                    teamToLeave.playerOne = teamToLeave.playerTwo!!
+                    teamToLeave.playerTwo = null
+                } else {
+                    // If there's no playerTwo, delete the team
+                    teamRepo.delete(teamToLeave.id)
+                    return
+                }
+            }
+            teamToLeave.playerTwo?.phoneNumber == phoneNumber -> {
+                // If playerTwo is leaving, simply set playerTwo to null
+                teamToLeave.playerTwo = null
+            }
+            else -> throw NotFound("Player not found in the team")
         }
+
+        teamRepo.update(teamToLeave)
     }
+
 
     @Transactional
     fun merge(teamOneId: UUID, teamTwoId: UUID): Team {

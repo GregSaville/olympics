@@ -162,6 +162,7 @@ data class CreatePlusOneRequest(
     val participating: Boolean
 )
 data class UserDto(
+    val id: UUID,
     val phoneNumber: String,
     val username: String?,
     val participating: Boolean,
@@ -181,6 +182,7 @@ data class SignInRequest(
 fun List<Olympian>.toDtos(): List<UserDto> = map { it.toDto() }
 
 fun Olympian.toDto() = UserDto(
+    id = id,
     username = userName,
     phoneNumber = phoneNumber,
     participating = participating,

@@ -23,12 +23,6 @@ class TeamRepoImpl(
     override fun createTeam(team: Team): Team {
         LOG.debug("Saving Team ${team.id}")
         val createdTeam = entityManager.merge(team)
-        createdTeam.playerOne.team = team
-        createdTeam.playerTwo?.let {
-            it.team = team
-            entityManager.merge(it)
-        }
-        entityManager.merge(team.playerOne)
         return createdTeam
     }
 
